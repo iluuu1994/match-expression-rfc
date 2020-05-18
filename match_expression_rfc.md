@@ -173,7 +173,7 @@ $x = match { ... };
 $x = match (true) { ... };
 ```
 
-### Backward Incompatible Changes
+## Backward Incompatible Changes
 
 `match` was added as a keyword (`reserved_non_modifiers`). This means it can't be used in the following contexts anymore:
 

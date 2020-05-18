@@ -1,4 +1,4 @@
-# match expression RFC v2
+# PHP RFC: Match expression v2
 
 * Date: 2020-05-16
 * Author: Ilija Tovilo, tovilo.ilija@gmail.com
@@ -183,3 +183,7 @@ $x = match (true) { ... };
 * global constants
 
 Note that it will continue to work in method names and class constants.
+
+## Vote
+
+Voting started 2020-xx-xx and closes 2020-xx-xx.

@@ -51,21 +51,21 @@ It is very common that the `switch` produces some value that is used afterwards.
 ```php
 switch (1) {
     case 0:
-        $y = 'Foo';
+        $result = 'Foo';
         break;
     case 1:
-        $y = 'Bar';
+        $result = 'Bar';
         break;
     case 2:
-        $y = 'Baz';
+        $result = 'Baz';
         break;
 }
 
-echo $y;
+echo $result;
 //> Bar
 ```
 
-It is easy to forget assigning `$y` in one of the cases. It is also visually unintuitive to find `$y` declared in a deeper nested scope. `match` is an expression that evaluates to the result of the executed arm. This removes a lot of boilerplate and makes it impossible to forget assigning a value in an arm.
+It is easy to forget assigning `$result` in one of the cases. It is also visually unintuitive to find `$result` declared in a deeper nested scope. `match` is an expression that evaluates to the result of the executed arm. This removes a lot of boilerplate and makes it impossible to forget assigning a value in an arm.
 
 ```php
 echo match (1) {
@@ -83,17 +83,24 @@ The `switch` statement loosely compares (`==`) the given value to the case value
 ```php
 switch ('foo') {
     case 0:
-      echo "Oh no!\n";
+      $result = "Oh no!\n";
+      break;
+    case 'foo':
+      $result = "This is what I expected\n";
       break;
 }
+echo $result;
+//> Oh no!
 ```
 
 The `match` expression uses strict comparison (`===`) instead. The comparison is strict regardless of `strict_types`.
 
 ```php
 echo match ('foo') {
-    0 => "Never reached\n",
+    0 => "Oh no!\n",
+    'foo' => "This is what I expected\n",
 };
+//> This is what I expected
 ```
 
 ### No fallthrough
@@ -111,23 +118,16 @@ switch ($pressedKey) {
 }
 ```
 
-This was intended to be a feature so that multiple conditions can execute the same block of code. It is often hard to understand if the missing `break` was the authors intention or a mistake.
+The `match` expression resolves this problem by adding an implicit `break` after every arm.
 
 ```php
-switch ($x) {
-    case 1:
-    case 2:
-        // Same for 1 and 2
-        break;
-    case 3:
-        // Only 3
-    case 4:
-        // Same for 3 and 4
-        break;
-}
+match ($pressedKey) {
+    Key::RETURN_ => save(),
+    Key::DELETE => delete(),
+};
 ```
 
-The `match` expression resolves this problem by adding an implicit `break` after every arm. Multiple conditions can be comma-separated to execute the same block of code. There's no way to achieve the same result as 3 and 4. This feels natural because the body of a match arm can only contain a single expression.
+Multiple conditions can be comma-separated to execute the same block of code. There's no way to achieve the same result as 3 and 4.
 
 ```php
 echo match ($x) {
@@ -141,26 +141,23 @@ echo match ($x) {
 Another large source of bugs is not handling all the possible cases supplied to the `switch` statement.
 
 ```php
-switch ($configuration) {
-    case Config::FOO:
-        // ...
-        break;
-    case Config::BAR:
-        // ...
+switch ($operator) {
+    case BinaryOperator::ADD:
+        $result = $lhs + $rhs;
         break;
 }
+
+// Forgot to handle BinaryOperator::SUBTRACT
 ```
 
-This will go unnoticed until the program crashes in a weird way, causes strange behavior or even worse becomes a security hole. Many languages can check if all the cases are handled at compile time or force you to write a `default` case if they can't. For a dynamic language like PHP the only alternative is throwing an error. This is exactly what the `match` expression does. It throws an `UnhandledMatchError` if the condition isn't met for any of the arms.
+This will go unnoticed until the program crashes in a weird way, causes strange behavior or even worse becomes a security hole. Many languages can check if all the cases are handled at compile time or force you to write a `default` case if they can't. For a dynamic language like PHP the only alternative is throwing an error at runtime. This is exactly what the `match` expression does. It throws an `UnhandledMatchError` if the condition isn't met for any of the arms.
 
 ```php
-$y = match ($x) {
-    1 => 'Foo',
-    2 => 'Bar',
+$result = match ($operator) {
+    BinaryOperator::ADD => $lhs + $rhs,
 };
 
-// Only reached if $x is 1 or 2
-// $y is 'Foo' or 'Bar'
+// Throws when $operator is BinaryOperator::SUBTRACT so we catch the mistake early on
 ```
 
 ## Miscellaneous
@@ -170,7 +167,7 @@ $y = match ($x) {
 A match condition can be any arbitrary expression. Analogous to `switch` each condition will be checked from top to bottom until the first one matches. If a condition matches the remaining conditions won't be evaluated.
 
 ```php
-$y = match ($x) {
+$result = match ($x) {
     foo() => ...,
     $this->bar() => ..., // bar() isn't called if foo() matched with $x
     $this->baz => ...,
@@ -191,9 +188,9 @@ In this RFC the body of a match arm must be an expression. Blocks for match and 
 ### Allow dropping (true)
 
 ```php
-$x = match { ... };
+$result = match { ... };
 // Equivalent to
-$x = match (true) { ... };
+$result = match (true) { ... };
 ```
 
 ## Backward Incompatible Changes

@@ -127,7 +127,7 @@ match ($pressedKey) {
 };
 ```
 
-Multiple conditions can be comma-separated to execute the same block of code. There's no way to achieve the same result as 3 and 4.
+Multiple conditions can be comma-separated to execute the same block of code.
 
 ```php
 echo match ($x) {

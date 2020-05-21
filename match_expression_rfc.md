@@ -11,11 +11,34 @@
 
 This RFC proposes adding a new `match` expression that is similar to `switch` but with safer semantics and the ability to return values.
 
+[From the Doctrine query parser](https://github.com/doctrine/orm/blob/72bc09926df1ff71697f4cc2e478cf52f0aa30d8/lib/Doctrine/ORM/Query/Parser.php#L816):
+
 ```php
-$expressionResult = match ($condition) {
-    1, 2 => foo(),
-    3, 4 => bar(),
-    default => baz(),
+// Before
+switch ($this->lexer->lookahead['type']) {
+    case Lexer::T_SELECT:
+        $statement = $this->SelectStatement();
+        break;
+
+    case Lexer::T_UPDATE:
+        $statement = $this->UpdateStatement();
+        break;
+
+    case Lexer::T_DELETE:
+        $statement = $this->DeleteStatement();
+        break;
+
+    default:
+        $this->syntaxError('SELECT, UPDATE or DELETE');
+        break;
+}
+
+// After
+$statement = match ($this->lexer->lookahead['type']) {
+    Lexer::T_SELECT => $this->SelectStatement(),
+    Lexer::T_UPDATE => $this->UpdateStatement(),
+    Lexer::T_DELETE => $this->DeleteStatement(),
+    default => $this->syntaxError('SELECT, UPDATE or DELETE'),
 };
 ```
 

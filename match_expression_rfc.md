@@ -4,8 +4,8 @@
 * Author: Ilija Tovilo, tovilo.ilija@gmail.com
 * Status: Under discussion
 * Target Version: PHP 8.0
-* Implementation: https://github.com/php/php-src/pull/5371
-* Supersedes: https://wiki.php.net/rfc/match_expression
+* Implementation: [https://github.com/php/php-src/pull/5371](https://github.com/php/php-src/pull/5371)
+* Supersedes: [https://wiki.php.net/rfc/match_expression](https://wiki.php.net/rfc/match_expression)
 
 ## Proposal
 
